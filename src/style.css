@@ -5,12 +5,16 @@ window.capture-window {
 }
 
 .capture-pill {
-  margin: 14px;
+  /* Margin must exceed the shadow's reach (offset + blur), or GTK clips the
+     shadow at the window edge and it reads as a hard rectangle. Extra room
+     at the bottom for the downward-cast shadow. */
+  margin: 24px 32px 36px 32px;
   padding: 12px 20px;
   border-radius: 28px;
   background-color: @dialog_bg_color;
-  border: 1px solid alpha(@window_fg_color, 0.12);
-  box-shadow: 0 10px 28px alpha(black, 0.28);
+  border: 1px solid alpha(@window_fg_color, 0.1);
+  box-shadow: 0 1px 3px alpha(black, 0.12),
+              0 8px 24px alpha(black, 0.2);
 }
 
 entry.capture-entry,

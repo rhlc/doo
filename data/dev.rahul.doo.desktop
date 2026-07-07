@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=doo
+Comment=Minimalist quick task capture
+Exec=doo
+Icon=checkbox-checked-symbolic
+Terminal=false
+Categories=Utility;GTK;
+Keywords=task;todo;capture;
+StartupWMClass=dev.rahul.doo

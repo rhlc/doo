@@ -1,0 +1,30 @@
+[package]
+name = "doo"
+version = "0.1.0"
+edition = "2021"
+description = "Minimalist quick task capture for GNOME"
+license = "MIT"
+
+[dependencies]
+gtk = { package = "gtk4", version = "0.11", features = ["v4_12"] }
+adw = { package = "libadwaita", version = "0.9", features = ["v1_5"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
+
+[profile.release]
+lto = true
+strip = true
+
+[package.metadata.deb]
+maintainer = "Rahul <rahulcy7@gmail.com>"
+copyright = "2026, Rahul"
+extended-description = """\
+Runs in the background; press Super+T anywhere to pop up a quick \
+task-capture entry. Open doo to review captured tasks."""
+section = "utility"
+priority = "optional"
+depends = "$auto"
+assets = [
+    ["target/release/doo", "usr/bin/", "755"],
+    ["data/dev.rahul.doo.desktop", "usr/share/applications/", "644"],
+    ["data/dev.rahul.doo-autostart.desktop", "etc/xdg/autostart/", "644"],
+]

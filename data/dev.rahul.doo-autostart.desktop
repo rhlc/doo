@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=doo (background)
+Comment=Start doo task capture in the background
+Exec=doo --background
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+OnlyShowIn=GNOME;

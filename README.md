@@ -9,7 +9,10 @@ doo is a tiny GNOME/Ubuntu app that sits in the background. Press
 - type the task and hit **Enter** — saved
 - **Esc** — never mind
 
-Open **doo** from the app grid whenever you want to see what you captured.
+Open **doo** from the app grid whenever you want to see what you captured,
+or use the **tray icon**: left-click to capture, right-click for Show tasks /
+Quit. Delete a task from the list with its trash button.
+
 That's the whole app (for now — more in later phases).
 
 ## Install
@@ -28,7 +31,10 @@ Launch **doo** once (or just log out and back in). The first launch:
 - leaves a background instance running; it also autostarts on every login
 
 Requirements: Ubuntu 24.04+ (or any Linux with GNOME 45+, GTK 4.12+ and
-libadwaita 1.5+). Wayland and X11 both work.
+libadwaita 1.5+). Wayland and X11 both work. The tray icon uses the
+StatusNotifierItem standard — Ubuntu ships the needed AppIndicator support by
+default; on vanilla GNOME install the "AppIndicator and KStatusNotifierItem
+Support" extension. Without it the app still runs fine via Super+T.
 
 ## Where your tasks live
 
@@ -76,8 +82,9 @@ Code map:
 | `src/main.rs`    | app entry, CLI routing, stays resident                  |
 | `src/capture.rs` | the quick-capture popup                                 |
 | `src/window.rs`  | the task list window                                    |
-| `src/storage.rs` | SQLite store (`add`, `all`) — extend here for new phases |
+| `src/storage.rs` | SQLite store (`add`, `all`, `delete`) — extend here for new phases |
 | `src/hotkey.rs`  | self-registers the Super+T GNOME shortcut               |
+| `src/tray.rs`    | StatusNotifierItem tray icon + menu                     |
 
 ## CLI
 

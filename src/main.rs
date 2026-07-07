@@ -1,6 +1,7 @@
 mod capture;
 mod hotkey;
 mod storage;
+mod tray;
 mod window;
 
 use adw::prelude::*;
@@ -17,7 +18,8 @@ fn main() -> glib::ExitCode {
     app.connect_startup(|app| {
         load_css();
         hotkey::ensure_registered();
-        // Stay resident with no windows open; phase 1 has no explicit quit.
+        tray::start(app);
+        // Stay resident with no windows open; the tray's Quit item exits.
         std::mem::forget(app.hold());
     });
 

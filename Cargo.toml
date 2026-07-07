@@ -1,6 +1,6 @@
 [package]
 name = "doo"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 description = "Minimalist quick task capture for GNOME"
 license = "MIT"
@@ -9,6 +9,8 @@ license = "MIT"
 gtk = { package = "gtk4", version = "0.11", features = ["v4_12"] }
 adw = { package = "libadwaita", version = "0.9", features = ["v1_5"] }
 rusqlite = { version = "0.40", features = ["bundled"] }
+ksni = { version = "0.3", default-features = false, features = ["blocking", "async-io"] }
+async-channel = "2"
 
 [profile.release]
 lto = true

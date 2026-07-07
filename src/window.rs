@@ -59,7 +59,7 @@ fn populate(win: &adw::ApplicationWindow) {
             .build();
         list.add_css_class("boxed-list");
         for task in &tasks {
-            list.append(&task_row(task));
+            list.append(&task_row(win, task));
         }
         gtk::ScrolledWindow::builder()
             .hscrollbar_policy(gtk::PolicyType::Never)
@@ -75,11 +75,31 @@ fn populate(win: &adw::ApplicationWindow) {
     win.set_content(Some(&view));
 }
 
-fn task_row(task: &Task) -> adw::ActionRow {
-    adw::ActionRow::builder()
+fn task_row(win: &adw::ApplicationWindow, task: &Task) -> adw::ActionRow {
+    let row = adw::ActionRow::builder()
         .title(glib::markup_escape_text(&task.text))
         .subtitle(relative_time(&task.created_at))
-        .build()
+        .build();
+
+    let delete = gtk::Button::builder()
+        .icon_name("user-trash-symbolic")
+        .valign(gtk::Align::Center)
+        .tooltip_text("Delete task")
+        .build();
+    delete.add_css_class("flat");
+    delete.connect_clicked(glib::clone!(
+        #[weak]
+        win,
+        #[strong(rename_to = id)]
+        task.id,
+        move |_| {
+            Store::open().delete(id);
+            populate(&win);
+        }
+    ));
+    row.add_suffix(&delete);
+
+    row
 }
 
 fn relative_time(iso: &str) -> String {

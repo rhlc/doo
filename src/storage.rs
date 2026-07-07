@@ -3,7 +3,6 @@ use rusqlite::Connection;
 use std::path::{Path, PathBuf};
 
 pub struct Task {
-    #[allow(dead_code)] // not shown in the UI yet; later phases (done/delete) key on it
     pub id: i64,
     pub text: String,
     pub created_at: String, // ISO 8601, UTC
@@ -59,6 +58,12 @@ impl Store {
         .filter_map(Result::ok)
         .collect()
     }
+
+    pub fn delete(&self, id: i64) {
+        self.conn
+            .execute("DELETE FROM tasks WHERE id = ?1", [id])
+            .expect("failed to delete task");
+    }
 }
 
 fn db_path() -> PathBuf {
@@ -86,6 +91,11 @@ mod tests {
         assert_eq!(tasks[1].text, "first task");
         assert!(tasks[0].id > tasks[1].id);
         assert!(!tasks[0].created_at.is_empty());
+
+        store.delete(tasks[0].id);
+        let tasks = store.all();
+        assert_eq!(tasks.len(), 1);
+        assert_eq!(tasks[0].text, "first task");
 
         std::fs::remove_dir_all(&dir).ok();
     }

@@ -7,11 +7,13 @@ doo is a tiny GNOME/Ubuntu app that sits in the background. Press
 **Super+T** anywhere and a small entry pops up:
 
 - type the task and hit **Enter** — saved
+- **Ctrl+V** — paste a screenshot to attach it (with an optional note)
 - **Esc** — never mind
 
 Open **doo** from the app grid whenever you want to see what you captured,
 or use the **tray icon**: left-click to capture, right-click for Show tasks /
-Quit. Delete a task from the list with its trash button.
+Quit. Tasks with a screenshot show a thumbnail — click the row to view it
+full-size. Delete a task from the list with its trash button.
 
 That's the whole app (for now — more in later phases).
 
@@ -38,8 +40,8 @@ Support" extension. Without it the app still runs fine via Super+T.
 
 ## Where your tasks live
 
-A plain SQLite file: `~/.local/share/doo/doo.db`. Yours to back up, sync,
-or query:
+A plain SQLite file: `~/.local/share/doo/doo.db`, with pasted screenshots
+alongside in `~/.local/share/doo/images/`. Yours to back up, sync, or query:
 
 ```bash
 sqlite3 ~/.local/share/doo/doo.db 'SELECT * FROM tasks;'

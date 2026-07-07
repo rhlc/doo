@@ -12,8 +12,11 @@ doo is a tiny GNOME/Ubuntu app that sits in the background. Press
 
 Open **doo** from the app grid whenever you want to see what you captured,
 or use the **tray icon**: left-click to capture, right-click for Show tasks /
-Quit. Tasks with a screenshot show a thumbnail — click the row to view it
-full-size. Delete a task from the list with its trash button.
+Quit. The window is a three-pane layout — sidebar (coming soon), the task
+list, and a detail panel. Click a task to open it in the detail panel; tasks
+with a screenshot show a paperclip and display the image full-size there. You
+can also add tasks inline with the **Add task** field, and delete the open
+task from the detail panel's trash button.
 
 That's the whole app (for now — more in later phases).
 
@@ -83,7 +86,7 @@ Code map:
 | ---------------- | ------------------------------------------------------- |
 | `src/main.rs`    | app entry, CLI routing, stays resident                  |
 | `src/capture.rs` | the quick-capture popup                                 |
-| `src/window.rs`  | the task list window                                    |
+| `src/window.rs`  | main window: sidebar + task list + detail pane          |
 | `src/storage.rs` | SQLite store (`add`, `all`, `delete`) — extend here for new phases |
 | `src/hotkey.rs`  | self-registers the Super+T GNOME shortcut               |
 | `src/tray.rs`    | StatusNotifierItem tray icon + menu                     |

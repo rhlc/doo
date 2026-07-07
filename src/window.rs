@@ -49,9 +49,14 @@ fn populate(win: &adw::ApplicationWindow) {
 
     root.append(&build_sidebar());
 
+    // Window controls (min/max/close) always sit at the window's far top-right.
+    // That corner is the list header when nothing is selected, and the detail
+    // header once a task opens, so we keep one set in each and swap which shows.
+    let list_controls = gtk::WindowControls::new(gtk::PackType::End);
+
     // The right-hand detail panel, hidden until a task is selected.
-    let detail = DetailPane::new(win);
-    let list_pane = build_list_pane(win, &tasks, &detail);
+    let detail = DetailPane::new(win, &list_controls);
+    let list_pane = build_list_pane(win, &tasks, &detail, &list_controls);
 
     root.append(&list_pane);
     root.append(&detail.container);
@@ -96,12 +101,13 @@ fn build_list_pane(
     win: &adw::ApplicationWindow,
     tasks: &Rc<Vec<Task>>,
     detail: &DetailPane,
+    list_controls: &gtk::WindowControls,
 ) -> gtk::Box {
     let pane = gtk::Box::new(gtk::Orientation::Vertical, 0);
     pane.add_css_class("list-pane");
     pane.set_hexpand(true);
 
-    pane.append(&build_header());
+    pane.append(&build_header(list_controls));
     pane.append(&build_add_task(win));
 
     let list = gtk::ListBox::new();
@@ -148,7 +154,7 @@ fn build_list_pane(
     pane
 }
 
-fn build_header() -> gtk::WindowHandle {
+fn build_header(controls: &gtk::WindowControls) -> gtk::WindowHandle {
     let hamburger = gtk::Image::from_icon_name("open-menu-symbolic");
     hamburger.add_css_class("dim-label");
 
@@ -172,7 +178,7 @@ fn build_header() -> gtk::WindowHandle {
     bar.append(&spacer);
     bar.append(&sort);
     bar.append(&more);
-    bar.append(&gtk::WindowControls::new(gtk::PackType::End));
+    bar.append(controls);
 
     // Wrap in a WindowHandle so the custom header is draggable (no titlebar).
     let handle = gtk::WindowHandle::new();
@@ -251,11 +257,13 @@ struct DetailPane {
     created: gtk::Label,
     image: gtk::Picture,
     image_frame: gtk::Box,
+    controls: gtk::WindowControls,
+    list_controls: gtk::WindowControls,
     current_id: Rc<RefCell<Option<i64>>>,
 }
 
 impl DetailPane {
-    fn new(win: &adw::ApplicationWindow) -> Self {
+    fn new(win: &adw::ApplicationWindow, list_controls: &gtk::WindowControls) -> Self {
         let current_id: Rc<RefCell<Option<i64>>> = Rc::new(RefCell::new(None));
 
         // Header: completion check, due-date pill, flag, and delete.
@@ -275,6 +283,11 @@ impl DetailPane {
         delete.add_css_class("flat");
         delete.set_tooltip_text(Some("Delete task"));
 
+        // This pane's own window controls — shown (and list header's hidden)
+        // while the detail pane is the window's rightmost column.
+        let controls = gtk::WindowControls::new(gtk::PackType::End);
+        controls.set_visible(false);
+
         let spacer = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         spacer.set_hexpand(true);
 
@@ -285,6 +298,7 @@ impl DetailPane {
         header.append(&spacer);
         header.append(&flag);
         header.append(&delete);
+        header.append(&controls);
 
         // Body: title + large screenshot.
         let title = gtk::Label::new(None);
@@ -352,11 +366,16 @@ impl DetailPane {
             created,
             image,
             image_frame,
+            controls,
+            list_controls: list_controls.clone(),
             current_id,
         }
     }
 
     fn show_task(&self, task: &Task) {
+        // Hand the window controls to this pane — it's now the rightmost column.
+        self.list_controls.set_visible(false);
+        self.controls.set_visible(true);
         *self.current_id.borrow_mut() = Some(task.id);
         let has_text = !task.text.trim().is_empty();
         self.title.set_text(if has_text { &task.text } else { "Screenshot" });
@@ -374,6 +393,9 @@ impl DetailPane {
     }
 
     fn hide(&self) {
+        // Return the window controls to the list header (now the rightmost).
+        self.controls.set_visible(false);
+        self.list_controls.set_visible(true);
         *self.current_id.borrow_mut() = None;
         self.container.set_visible(false);
     }

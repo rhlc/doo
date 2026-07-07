@@ -1,53 +1,88 @@
 # doo
 
-Minimalist quick task capture for GNOME/Ubuntu. Runs in the background;
-press **Super+T** anywhere to pop up a capture entry — type the task, hit
-Enter, done. Open **doo** from the app grid to review captured tasks.
+Capture a task the moment it crosses your mind, without leaving what you're
+doing.
 
-## How it works
+doo is a tiny GNOME/Ubuntu app that sits in the background. Press
+**Super+T** anywhere and a small entry pops up:
 
-- Rust + GTK4 + libadwaita; single-instance `GApplication` (`dev.rahul.doo`).
-- On Wayland apps can't grab global hotkeys, so on first launch doo registers
-  a GNOME custom keyboard shortcut (**Super+T** → `doo capture`). The shortcut
-  invocation is forwarded to the running background instance over D-Bus.
-- Tasks are stored in SQLite at `~/.local/share/doo/doo.db`.
-- An autostart entry (`/etc/xdg/autostart`) launches `doo --background` at login.
+- type the task and hit **Enter** — saved
+- **Esc** — never mind
 
-## Build & install
+Open **doo** from the app grid whenever you want to see what you captured.
+That's the whole app (for now — more in later phases).
 
-Build dependencies (Ubuntu):
+## Install
+
+Grab the `.deb` from the releases (or build it yourself, below), then:
 
 ```bash
-sudo apt install build-essential pkg-config libgtk-4-dev libadwaita-1-dev
-cargo install cargo-deb   # once
+sudo apt install ./doo_0.0.1-1_amd64.deb
 ```
 
-Build the package and install it:
+Launch **doo** once (or just log out and back in). The first launch:
+
+- registers the **Super+T** shortcut for you (it won't steal the combo if
+  you already use it for something else — check *Settings → Keyboard →
+  Custom Shortcuts* in that case)
+- leaves a background instance running; it also autostarts on every login
+
+Requirements: Ubuntu 24.04+ (or any Linux with GNOME 45+, GTK 4.12+ and
+libadwaita 1.5+). Wayland and X11 both work.
+
+## Where your tasks live
+
+A plain SQLite file: `~/.local/share/doo/doo.db`. Yours to back up, sync,
+or query:
 
 ```bash
+sqlite3 ~/.local/share/doo/doo.db 'SELECT * FROM tasks;'
+```
+
+## Build from source
+
+```bash
+# toolchain (once)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+sudo apt install build-essential pkg-config libgtk-4-dev libadwaita-1-dev
+cargo install cargo-deb
+
+# build the package
 cargo deb
 sudo apt install ./target/debian/doo_*.deb
 ```
 
-Then launch `doo` once (or re-login) — that registers the Super+T shortcut
-and leaves the background instance running.
+First build takes a few minutes (it compiles the GTK bindings); after that,
+seconds.
 
-## Development
+## Hacking on it
 
 ```bash
 cargo test                  # storage unit tests
-cargo run -- --background   # start resident instance
-cargo run -- capture        # trigger the capture popup (forwards via D-Bus)
-cargo run                   # open the main window
+cargo run -- --background   # start the resident instance
+cargo run -- capture        # pop the capture entry (forwards via D-Bus)
+cargo run                   # open the task list
 ```
 
-Note: a dev run registers the shortcut against the dev binary path; installing
-the .deb later self-heals the shortcut to `/usr/bin/doo`.
+The app is single-instance: any later invocation is forwarded to the running
+process over D-Bus, which is exactly how the global shortcut reaches it.
+A dev run registers the shortcut against your build directory; installing the
+.deb self-heals it to `/usr/bin/doo` next time the installed binary starts.
+
+Code map:
+
+| File             | Does                                                    |
+| ---------------- | ------------------------------------------------------- |
+| `src/main.rs`    | app entry, CLI routing, stays resident                  |
+| `src/capture.rs` | the quick-capture popup                                 |
+| `src/window.rs`  | the task list window                                    |
+| `src/storage.rs` | SQLite store (`add`, `all`) — extend here for new phases |
+| `src/hotkey.rs`  | self-registers the Super+T GNOME shortcut               |
 
 ## CLI
 
-| Command            | Effect                                   |
-| ------------------ | ---------------------------------------- |
-| `doo`              | Open the main window (task list)         |
-| `doo capture`      | Show the quick-capture popup             |
-| `doo --background` | Start resident with no window (autostart) |
+| Command            | Effect                                     |
+| ------------------ | ------------------------------------------ |
+| `doo`              | Open the task list                         |
+| `doo capture`      | Show the quick-capture popup               |
+| `doo --background` | Start resident with no window (autostart)  |

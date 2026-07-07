@@ -1,6 +1,6 @@
 [package]
 name = "doo"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 description = "Minimalist quick task capture for GNOME"
 license = "MIT"
